@@ -1,3 +1,5 @@
+import { ProjectFromSheets, getProjectsFromSheets } from './sheets';
+
 export interface ProjectImage {
   id: string;
   url: string;
@@ -23,6 +25,36 @@ export interface Project {
     scope: string;
     challenge: string;
     solution: string;
+  };
+}
+
+function convertSheetProjectToProject(sheetProject: ProjectFromSheets): Project {
+  const timeline: ProjectImage[] = sheetProject.timelineImages.map((url, index) => ({
+    id: `${sheetProject.id}-${index}`,
+    url,
+    date: '',
+    stage: `Stage ${index + 1}`,
+    description: '',
+  }));
+
+  return {
+    id: sheetProject.id,
+    title: sheetProject.title,
+    description: sheetProject.description,
+    location: '',
+    year: new Date().getFullYear(),
+    category: sheetProject.category,
+    beforeImage: sheetProject.beforeImage,
+    afterImage: sheetProject.afterImage,
+    tags: [sheetProject.category],
+    timeline,
+    details: {
+      client: '',
+      duration: '',
+      scope: sheetProject.description,
+      challenge: '',
+      solution: '',
+    },
   };
 }
 
@@ -173,6 +205,19 @@ export const featuredProjects: Project[] = [
   }
 ];
 
-export function getProjectById(id: string): Project | undefined {
-  return featuredProjects.find(project => project.id === id);
+export async function getAllProjects(): Promise<Project[]> {
+  try {
+    const sheetProjects = await getProjectsFromSheets();
+    if (sheetProjects.length > 0) {
+      return sheetProjects.map(convertSheetProjectToProject);
+    }
+  } catch (error) {
+    console.error('Failed to fetch projects from sheets, using fallback data:', error);
+  }
+  return featuredProjects;
+}
+
+export async function getProjectById(id: string): Promise<Project | undefined> {
+  const projects = await getAllProjects();
+  return projects.find(project => project.id === id);
 }

@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getProjectById, featuredProjects } from '@/lib/projects-data';
+import { getProjectById, getAllProjects } from '@/lib/projects-data';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -11,14 +11,15 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  return featuredProjects.map((project) => ({
+  const projects = await getAllProjects();
+  return projects.map((project) => ({
     id: project.id,
   }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const project = getProjectById(params.id);
-  
+  const project = await getProjectById(params.id);
+
   if (!project) {
     return {
       title: 'Project Not Found',
@@ -31,8 +32,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default function ProjectPage({ params }: Props) {
-  const project = getProjectById(params.id);
+export default async function ProjectPage({ params }: Props) {
+  const project = await getProjectById(params.id);
 
   if (!project) {
     notFound();

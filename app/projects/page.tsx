@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
-import { Project, featuredProjects } from '@/lib/projects-data';
-import { Button } from '@/components/ui/button';
+import { Project, getAllProjects } from '@/lib/projects-data';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
@@ -34,10 +33,10 @@ function ProjectCard({ project }: { project: Project }) {
             </div>
           </div>
         </div>
-        
+
         <div className="p-6">
           <h3 className="text-xl font-bold mb-2">{project.title}</h3>
-          <p className="text-sm text-muted-foreground mb-4">{project.location} • {project.year}</p>
+          <p className="text-sm text-muted-foreground mb-4">{project.category}</p>
           <p className="text-muted-foreground mb-4">{project.description}</p>
           <div className="flex flex-wrap gap-2">
             {project.tags.map((tag) => (
@@ -55,19 +54,21 @@ function ProjectCard({ project }: { project: Project }) {
   );
 }
 
-export default function ProjectsPage() {
+export default async function ProjectsPage() {
+  const projects = await getAllProjects();
+
   return (
     <div className="container py-12">
       <div className="max-w-2xl mb-12">
         <h1 className="text-4xl font-bold mb-4">Our Projects</h1>
         <p className="text-muted-foreground">
-          Explore our portfolio of architectural transformations. Each project 
+          Explore our portfolio of architectural transformations. Each project
           showcases our commitment to innovative design and quality craftsmanship.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {featuredProjects.map((project) => (
+        {projects.map((project) => (
           <ProjectCard key={project.id} project={project} />
         ))}
       </div>
