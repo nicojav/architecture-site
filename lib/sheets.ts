@@ -34,13 +34,15 @@ export async function getProjectsFromSheets(): Promise<ProjectFromSheets[]> {
   }
 
   try {
-    const jwt = new JWT({
-      email: CREDENTIALS.client_email,
-      key: CREDENTIALS.private_key,
-      scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
-    });
 
-    const doc = new GoogleSpreadsheet(SPREADSHEET_ID, jwt);
+    const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
+
+    await doc.useServiceAccountAuth({
+  client_email: CREDENTIALS.client_email,
+  private_key: CREDENTIALS.private_key,
+});
+  
+    
     await doc.loadInfo();
 
     const sheet = doc.sheetsById[parseInt(SHEET_ID)];
