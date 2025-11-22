@@ -38,10 +38,9 @@ export async function getProjectsFromSheets(): Promise<ProjectFromSheets[]> {
     const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
 
     await doc.useServiceAccountAuth({
-  client_email: CREDENTIALS.client_email,
-  private_key: CREDENTIALS.private_key,
-});
-  
+      client_email: CREDENTIALS.client_email,
+      private_key: CREDENTIALS.private_key,
+    });
     
     await doc.loadInfo();
 
