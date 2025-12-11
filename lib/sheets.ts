@@ -20,9 +20,14 @@ export async function getProjectsFromSheets(): Promise<ProjectFromSheets[]> {
     return cachedProjects;
   }
 
+  const privateKeyValue = process.env.GOOGLE_SHEETS_PRIVATE_KEY || '';
+  const privateKey = privateKeyValue.startsWith('-----')
+    ? privateKeyValue.replace(/\\n/g, '\n')
+    : Buffer.from(privateKeyValue, 'base64').toString('utf-8').replace(/\\n/g, '\n');
+
   const CREDENTIALS = {
     client_email: process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
-    private_key: process.env.GOOGLE_SHEETS_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    private_key: privateKey,
   };
 
   const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
@@ -34,14 +39,13 @@ export async function getProjectsFromSheets(): Promise<ProjectFromSheets[]> {
   }
 
   try {
-
-    const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
-
-    await doc.useServiceAccountAuth({
-      client_email: CREDENTIALS.client_email,
-      private_key: CREDENTIALS.private_key,
+    const jwt = new JWT({
+      email: CREDENTIALS.client_email,
+      key: CREDENTIALS.private_key,
+      scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
     });
-    
+
+    const doc = new GoogleSpreadsheet(SPREADSHEET_ID, jwt);
     await doc.loadInfo();
 
     const sheet = doc.sheetsById[parseInt(SHEET_ID)];
