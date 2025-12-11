@@ -20,10 +20,7 @@ export async function getProjectsFromSheets(): Promise<ProjectFromSheets[]> {
     return cachedProjects;
   }
 
-  const privateKeyValue = process.env.GOOGLE_SHEETS_PRIVATE_KEY || '';
-  const privateKey = privateKeyValue.startsWith('-----')
-    ? privateKeyValue.replace(/\\n/g, '\n')
-    : Buffer.from(privateKeyValue, 'base64').toString('utf-8').replace(/\\n/g, '\n');
+  const privateKey = process.env.GOOGLE_SHEETS_PRIVATE_KEY || '';
 
   const CREDENTIALS = {
     client_email: process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
