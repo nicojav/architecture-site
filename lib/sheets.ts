@@ -35,6 +35,8 @@ export async function getProjectsFromSheets(): Promise<ProjectFromSheets[]> {
     return [];
   }
 
+  console.log('CREDENTIALS:', CREDENTIALS)
+
   try {
     const jwt = new JWT({
       email: CREDENTIALS.client_email,
