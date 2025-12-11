@@ -30,7 +30,7 @@ export async function getProjectsFromSheets(): Promise<ProjectFromSheets[]> {
     private_key: privateKey,
   };
 
-  console.log('privateKey:',privateKey);
+  console.log('privateKey:',privateKeyValue);
 
   const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
   const SHEET_ID = process.env.GOOGLE_SHEETS_SHEET_ID;
