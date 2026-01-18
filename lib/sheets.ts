@@ -20,7 +20,12 @@ export async function getProjectsFromSheets(): Promise<ProjectFromSheets[]> {
     return cachedProjects;
   }
 
-  const privateKey = process.env.GOOGLE_SHEETS_PRIVATE_KEY || '';
+  const rawPrivateKey = process.env.GOOGLE_SHEETS_PRIVATE_KEY || '';
+  // When storing PEM keys in environment variables newlines are often escaped as "\\n".
+  // Normalize the value so crypto signing receives a proper PEM string.
+  const privateKey = rawPrivateKey.includes('\\n')
+    ? rawPrivateKey.replace(/\\n/g, '\n')
+    : rawPrivateKey;
 
   const CREDENTIALS = {
     client_email: process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
@@ -35,7 +40,12 @@ export async function getProjectsFromSheets(): Promise<ProjectFromSheets[]> {
     return [];
   }
 
-  console.log('CREDENTIALS:', CREDENTIALS)
+  // Do not log the private key. Log only whether credentials appear present.
+  console.log('Google Sheets credentials loaded for', CREDENTIALS.client_email);
+
+  if (privateKey && !privateKey.startsWith('-----')) {
+    console.warn('GOOGLE_SHEETS_PRIVATE_KEY does not look like a PEM key. \nMake sure you provided the service account private key (PEM) and, if you put it in an env var, that you escaped newlines as "\\n".');
+  }
 
   try {
     const jwt = new JWT({
