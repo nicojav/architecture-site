@@ -19,6 +19,10 @@ export interface Project {
   afterImage: string;
   tags: string[];
   timeline: ProjectImage[];
+  kitchenImages: string[];
+  bathroomImages: string[];
+  officeImages: string[];
+  livingRoomImages: string[];
   details: {
     client: string;
     duration: string;
@@ -69,6 +73,10 @@ export const featuredProjects: Project[] = [
         description: "Final touches and furnishing"
       }
     ],
+    kitchenImages: [],
+    bathroomImages: [],
+    officeImages: [],
+    livingRoomImages: [],
     details: {
       client: "The Anderson Family",
       duration: "9 months",
@@ -117,6 +125,10 @@ export const featuredProjects: Project[] = [
         description: "Final styling and furnishing"
       }
     ],
+    kitchenImages: [],
+    bathroomImages: [],
+    officeImages: [],
+    livingRoomImages: [],
     details: {
       client: "Urban Development Corp",
       duration: "8 months",
@@ -165,6 +177,10 @@ export const featuredProjects: Project[] = [
         description: "Finished spaces with coastal styling"
       }
     ],
+    kitchenImages: [],
+    bathroomImages: [],
+    officeImages: [],
+    livingRoomImages: [],
     details: {
       client: "The Martinez Family",
       duration: "9 months",
@@ -195,6 +211,10 @@ function convertSheetProjectToProject(sheetProject: ProjectFromSheets): Project 
     afterImage: sheetProject.afterImage,
     tags: [sheetProject.category],
     timeline,
+    kitchenImages: sheetProject.kitchenImages,
+    bathroomImages: sheetProject.bathroomImages,
+    officeImages: sheetProject.officeImages,
+    livingRoomImages: sheetProject.livingRoomImages,
     details: {
       client: '',
       duration: '',

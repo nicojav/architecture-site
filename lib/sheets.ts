@@ -8,12 +8,21 @@ export interface ProjectFromSheets {
   beforeImage: string;
   afterImage: string;
   timelineImages: string[];
+  kitchenImages: string[];
+  bathroomImages: string[];
+  officeImages: string[];
+  livingRoomImages: string[];
   description: string;
 }
 
 let cachedProjects: ProjectFromSheets[] | null = null;
 const CACHE_DURATION = 5 * 60 * 1000;
 let lastFetchTime = 0;
+
+function parseImageUrls(value: string | undefined): string[] {
+  const str = value || '';
+  return str ? str.split(',').map((url: string) => url.trim()).filter(Boolean) : [];
+}
 
 export async function getProjectsFromSheets(): Promise<ProjectFromSheets[]> {
   if (cachedProjects && (Date.now() - lastFetchTime) < CACHE_DURATION) {
@@ -61,18 +70,17 @@ export async function getProjectsFromSheets(): Promise<ProjectFromSheets[]> {
     const rows = await sheet.getRows();
 
     const projects: ProjectFromSheets[] = rows.map(row => {
-      const timelineImagesStr = row.get('timelineImages') || '';
-      const timelineImages = timelineImagesStr
-        ? timelineImagesStr.split(',').map((url: string) => url.trim()).filter(Boolean)
-        : [];
-
       return {
         id: row.get('id') || '',
         title: row.get('title') || '',
         category: row.get('category') || '',
         beforeImage: row.get('beforeImage') || '',
         afterImage: row.get('afterImage') || '',
-        timelineImages,
+        timelineImages: parseImageUrls(row.get('timelineImages')),
+        kitchenImages: parseImageUrls(row.get('kitchenImages')),
+        bathroomImages: parseImageUrls(row.get('bathroomImages')),
+        officeImages: parseImageUrls(row.get('officeImages')),
+        livingRoomImages: parseImageUrls(row.get('livingRoomImages')),
         description: row.get('description') || '',
       };
     });
