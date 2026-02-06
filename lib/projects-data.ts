@@ -1,4 +1,4 @@
-import { getProjectsFromSheets } from './sheets';
+import { getProjectsFromSheets, ProjectFromSheets } from './sheets';
 
 export interface ProjectImage {
   id: string;
@@ -27,11 +27,6 @@ export interface Project {
     solution: string;
   };
 }
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-);
 
 export const featuredProjects: Project[] = [
   {
@@ -179,6 +174,37 @@ export const featuredProjects: Project[] = [
     }
   }
 ];
+
+function convertSheetProjectToProject(sheetProject: ProjectFromSheets): Project {
+  const timeline: ProjectImage[] = sheetProject.timelineImages.map((url, index) => ({
+    id: `${sheetProject.id}-${index}`,
+    url,
+    date: '',
+    stage: `Stage ${index + 1}`,
+    description: '',
+  }));
+
+  return {
+    id: sheetProject.id,
+    title: sheetProject.title,
+    description: sheetProject.description,
+    location: '',
+    year: new Date().getFullYear(),
+    category: sheetProject.category,
+    beforeImage: sheetProject.beforeImage,
+    afterImage: sheetProject.afterImage,
+    tags: [sheetProject.category],
+    timeline,
+    details: {
+      client: '',
+      duration: '',
+      scope: sheetProject.description,
+      challenge: '',
+      solution: '',
+    },
+  };
+}
+
 
 export async function getAllProjects(): Promise<Project[]> {
   try {
