@@ -69,6 +69,7 @@ app/
 - `footer.tsx` - Site footer
 - `featured-projects.tsx` - Project grid for homepage
 - `project-timeline.tsx` - Interactive timeline visualization
+- `room-image-section.tsx` - Two-column room image grid with lightbox (auto-hides if no images)
 - `theme-provider.tsx` - next-themes wrapper for dark mode
 
 **UI Components** (components/ui/):
@@ -103,6 +104,10 @@ interface Project {
   afterImage: string;      // Image URL
   tags: string[];
   timeline: ProjectImage[]; // Array of progress images
+  kitchenImages: string[];  // Room-specific images (hidden if empty)
+  bathroomImages: string[]; // Room-specific images (hidden if empty)
+  officeImages: string[];   // Room-specific images (hidden if empty)
+  livingRoomImages: string[]; // Room-specific images (hidden if empty)
   details: {
     client: string;
     duration: string;
@@ -121,6 +126,10 @@ Expected columns in the Google Sheet:
 - `beforeImage` - Before photo URL
 - `afterImage` - After photo URL
 - `timelineImages` - Comma-separated URLs
+- `kitchenImages` - Comma-separated URLs (optional, displayed in 2-col grid)
+- `bathroomImages` - Comma-separated URLs (optional, displayed in 2-col grid)
+- `officeImages` - Comma-separated URLs (optional, displayed in 2-col grid)
+- `livingRoomImages` - Comma-separated URLs (optional, displayed in 2-col grid)
 - `description` - Project description
 
 ## Important Implementation Notes

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import ProjectTimeline from '@/components/project-timeline';
+import RoomImageSection from '@/components/room-image-section';
 
 interface Props {
   params: { id: string }
@@ -80,6 +81,11 @@ export default async function ProjectPage({ params }: Props) {
             <h2 className="text-2xl font-bold mb-6">Project Timeline</h2>
             <ProjectTimeline images={project.timeline} />
           </div>
+
+          <RoomImageSection title="Kitchen" images={project.kitchenImages} />
+          <RoomImageSection title="Bathroom" images={project.bathroomImages} />
+          <RoomImageSection title="Office" images={project.officeImages} />
+          <RoomImageSection title="Living Room" images={project.livingRoomImages} />
         </div>
 
         <div className="lg:col-span-1">
