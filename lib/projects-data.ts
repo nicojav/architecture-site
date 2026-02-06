@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { getProjectsFromSheets, ProjectFromSheets } from './sheets';
 
 export interface ProjectImage {
   id: string;
@@ -27,11 +27,6 @@ export interface Project {
     solution: string;
   };
 }
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-);
 
 export const featuredProjects: Project[] = [
   {
@@ -180,49 +175,49 @@ export const featuredProjects: Project[] = [
   }
 ];
 
+function convertSheetProjectToProject(sheetProject: ProjectFromSheets): Project {
+  const timeline: ProjectImage[] = sheetProject.timelineImages.map((url, index) => ({
+    id: `${sheetProject.id}-${index}`,
+    url,
+    date: '',
+    stage: `Stage ${index + 1}`,
+    description: '',
+  }));
+
+  return {
+    id: sheetProject.id,
+    title: sheetProject.title,
+    description: sheetProject.description,
+    location: '',
+    year: new Date().getFullYear(),
+    category: sheetProject.category,
+    beforeImage: sheetProject.beforeImage,
+    afterImage: sheetProject.afterImage,
+    tags: [sheetProject.category],
+    timeline,
+    details: {
+      client: '',
+      duration: '',
+      scope: sheetProject.description,
+      challenge: '',
+      solution: '',
+    },
+  };
+}
+
+
 export async function getAllProjects(): Promise<Project[]> {
   try {
-    const { data: projects, error } = await supabase
-      .from('projects')
-      .select('*, timeline_images(*)')
-      .order('created_at', { ascending: true });
-
-    if (error) throw error;
-
-    if (projects && projects.length > 0) {
-      return projects.map((p: any) => ({
-        id: p.id,
-        title: p.title,
-        description: p.description,
-        location: p.location || '',
-        year: p.year || new Date().getFullYear(),
-        category: p.category,
-        beforeImage: p.before_image,
-        afterImage: p.after_image,
-        tags: p.tags || [],
-        timeline: (p.timeline_images || [])
-          .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
-          .map((img: any) => ({
-            id: img.id,
-            url: img.url,
-            date: img.date || '',
-            stage: img.stage || '',
-            description: img.description || '',
-          })),
-        details: {
-          client: p.client || '',
-          duration: p.duration || '',
-          scope: p.scope || '',
-          challenge: p.challenge || '',
-          solution: p.solution || '',
-        },
-      }));
+    const sheetProjects = await getProjectsFromSheets();
+    if (sheetProjects.length > 0) {
+      return sheetProjects.map(convertSheetProjectToProject);
     }
   } catch (error) {
-    console.error('Failed to fetch projects from database, using fallback data:', error);
+    console.error('Failed to fetch projects from sheets, using fallback data:', error);
   }
   return featuredProjects;
 }
+
 
 export async function getProjectById(id: string): Promise<Project | undefined> {
   const projects = await getAllProjects();
