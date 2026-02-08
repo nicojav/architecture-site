@@ -1,4 +1,4 @@
-import { getProjectsFromSheets, ProjectFromSheets } from './sheets';
+import { getProjectsFromSheets, MergedProjectFromSheets } from './sheets';
 
 export interface ProjectImage {
   id: string;
@@ -191,7 +191,7 @@ export const featuredProjects: Project[] = [
   }
 ];
 
-function convertSheetProjectToProject(sheetProject: ProjectFromSheets): Project {
+function convertSheetProjectToProject(sheetProject: MergedProjectFromSheets): Project {
   const timeline: ProjectImage[] = sheetProject.timelineImages.map((url, index) => ({
     id: `${sheetProject.id}-${index}`,
     url,
@@ -204,8 +204,8 @@ function convertSheetProjectToProject(sheetProject: ProjectFromSheets): Project 
     id: sheetProject.id,
     title: sheetProject.title,
     description: sheetProject.description,
-    location: '',
-    year: new Date().getFullYear(),
+    location: sheetProject.location,
+    year: sheetProject.year ? parseInt(sheetProject.year) : new Date().getFullYear(),
     category: sheetProject.category,
     beforeImage: sheetProject.beforeImage,
     afterImage: sheetProject.afterImage,
@@ -217,10 +217,10 @@ function convertSheetProjectToProject(sheetProject: ProjectFromSheets): Project 
     livingRoomImages: sheetProject.livingRoomImages,
     details: {
       client: '',
-      duration: '',
+      duration: sheetProject.duration,
       scope: sheetProject.description,
-      challenge: '',
-      solution: '',
+      challenge: sheetProject.challenge,
+      solution: sheetProject.solution,
     },
   };
 }

@@ -12,10 +12,40 @@ export interface ProjectFromSheets {
   bathroomImages: string[];
   officeImages: string[];
   livingRoomImages: string[];
-  description: string;
 }
 
-let cachedProjects: ProjectFromSheets[] | null = null;
+export interface ProjectDetailsFromSheets {
+  id: string;
+  description: string;
+  location: string;
+  year: string;
+  duration: string;
+  challenge: string;
+  solution: string;
+}
+
+export interface MergedProjectFromSheets {
+  // From images sheet (tab 1):
+  id: string;
+  title: string;
+  category: string;
+  beforeImage: string;
+  afterImage: string;
+  timelineImages: string[];
+  kitchenImages: string[];
+  bathroomImages: string[];
+  officeImages: string[];
+  livingRoomImages: string[];
+  // From details sheet (tab 2):
+  description: string;
+  location: string;
+  year: string;
+  duration: string;
+  challenge: string;
+  solution: string;
+}
+
+let cachedProjects: MergedProjectFromSheets[] | null = null;
 const CACHE_DURATION = 5 * 60 * 1000;
 let lastFetchTime = 0;
 
@@ -24,7 +54,40 @@ function parseImageUrls(value: string | undefined): string[] {
   return str ? str.split(',').map((url: string) => url.trim()).filter(Boolean) : [];
 }
 
-export async function getProjectsFromSheets(): Promise<ProjectFromSheets[]> {
+async function getDetailsRows(doc: GoogleSpreadsheet, detailsSheetId: string): Promise<Map<string, ProjectDetailsFromSheets>> {
+  const detailsMap = new Map<string, ProjectDetailsFromSheets>();
+
+  try {
+    const detailsSheet = doc.sheetsById[parseInt(detailsSheetId)];
+    if (!detailsSheet) {
+      console.warn('Details sheet not found, using empty details');
+      return detailsMap;
+    }
+
+    const rows = await detailsSheet.getRows();
+
+    for (const row of rows) {
+      const id = row.get('id');
+      if (id) {
+        detailsMap.set(id, {
+          id,
+          description: row.get('description') || '',
+          location: row.get('location') || '',
+          year: row.get('year') || '',
+          duration: row.get('duration') || '',
+          challenge: row.get('challenge') || '',
+          solution: row.get('solution') || '',
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching details from Google Sheets:', error);
+  }
+
+  return detailsMap;
+}
+
+export async function getProjectsFromSheets(): Promise<MergedProjectFromSheets[]> {
   if (cachedProjects && (Date.now() - lastFetchTime) < CACHE_DURATION) {
     return cachedProjects;
   }
@@ -69,7 +132,7 @@ export async function getProjectsFromSheets(): Promise<ProjectFromSheets[]> {
     const sheet = doc.sheetsById[parseInt(SHEET_ID)];
     const rows = await sheet.getRows();
 
-    const projects: ProjectFromSheets[] = rows.map(row => {
+    const imageProjects: ProjectFromSheets[] = rows.map(row => {
       return {
         id: row.get('id') || '',
         title: row.get('title') || '',
@@ -81,7 +144,28 @@ export async function getProjectsFromSheets(): Promise<ProjectFromSheets[]> {
         bathroomImages: parseImageUrls(row.get('bathroomImages')),
         officeImages: parseImageUrls(row.get('officeImages')),
         livingRoomImages: parseImageUrls(row.get('livingRoomImages')),
-        description: row.get('description') || '',
+      };
+    });
+
+    // Fetch details from the second sheet if configured
+    const DETAILS_SHEET_ID = process.env.GOOGLE_SHEETS_DETAILS_SHEET_ID;
+    let detailsMap = new Map<string, ProjectDetailsFromSheets>();
+
+    if (DETAILS_SHEET_ID) {
+      detailsMap = await getDetailsRows(doc, DETAILS_SHEET_ID);
+    }
+
+    // Merge image projects with details
+    const projects: MergedProjectFromSheets[] = imageProjects.map(imageProject => {
+      const details = detailsMap.get(imageProject.id);
+      return {
+        ...imageProject,
+        description: details?.description || '',
+        location: details?.location || '',
+        year: details?.year || '',
+        duration: details?.duration || '',
+        challenge: details?.challenge || '',
+        solution: details?.solution || '',
       };
     });
 
